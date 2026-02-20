@@ -1,4 +1,5 @@
 {
+  "name": "countries-graphql",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",

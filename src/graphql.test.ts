@@ -2,12 +2,11 @@ import { buildHTTPExecutor } from '@graphql-tools/executor-http'
 import { expect, it } from 'bun:test'
 import { countries } from 'countries-list'
 import { parse } from 'graphql'
-
 import { yoga } from './graphql'
 
 const executor = buildHTTPExecutor({
   fetch: yoga.fetch,
-  endpoint: 'http://yoga/graphql',
+  endpoint: 'http://yoga/',
 })
 
 const ListFilteredCountriesQuery = parse(/* GraphQL */ `

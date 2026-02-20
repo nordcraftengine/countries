@@ -1,8 +1,8 @@
 {
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler publish --minify",
-    "deploy:dryrun": "wrangler publish --minify --dry-run",
+    "deploy": "wrangler deploy --minify",
+    "deploy:dryrun": "wrangler deploy --minify --dry-run",
     "typecheck": "tsgo --noEmit",
     "watch": "tsgo --noEmit -w"
   },

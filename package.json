@@ -1,6 +1,10 @@
 {
   "scripts": {
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "deploy:dryrun": "wrangler deploy --minify --dry-run",
+    "typecheck": "tsgo --noEmit",
+    "watch": "tsgo --noEmit -w"
   },
   "dependencies": {
     "@graphql-tools/utils": "^10.9.1",
@@ -20,15 +24,17 @@
     "@eslint/js": "^9.33.0",
     "@graphql-eslint/eslint-plugin": "^4.4.0",
     "@graphql-tools/executor-http": "^2.1.1",
+    "@types/bun": "1.3.9",
     "@types/iso-3166-2": "^1.0.4",
     "@types/provinces": "^1.11.6",
-    "eslint": "^9.33.0",
+    "@typescript/native-preview": "7.0.0-dev.20260220.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "prettier": "3.6.2",
-    "typescript": "^5.9.2",
+    "eslint": "^9.33.0",
+    "prettier-plugin-organize-imports": "4.3.0",
+    "prettier": "3.8.1",
     "typescript-eslint": "^8.39.1",
-    "wrangler": "^4.30.0"
+    "wrangler": "4.67.0"
   }
 }

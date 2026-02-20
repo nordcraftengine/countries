@@ -1,13 +1,14 @@
-import { buildHTTPExecutor } from "@graphql-tools/executor-http";
-import { countries } from "countries-list";
-import { parse } from "graphql";
+import { buildHTTPExecutor } from '@graphql-tools/executor-http'
+import { expect, it } from 'bun:test'
+import { countries } from 'countries-list'
+import { parse } from 'graphql'
 
-import { yoga } from "./graphql";
+import { yoga } from './graphql'
 
 const executor = buildHTTPExecutor({
   fetch: yoga.fetch,
-  endpoint: "http://yoga/graphql",
-});
+  endpoint: 'http://yoga/graphql',
+})
 
 const ListFilteredCountriesQuery = parse(/* GraphQL */ `
   query ListFilteredCountries($filter: CountryFilterInput) {
@@ -16,78 +17,78 @@ const ListFilteredCountriesQuery = parse(/* GraphQL */ `
       code
     }
   }
-`);
+`)
 
 function assertSingleValue<TValue extends object>(
   value: TValue | AsyncIterable<TValue>,
 ): asserts value is TValue {
   if (Symbol.asyncIterator in value) {
-    throw new Error("Expected single value");
+    throw new Error('Expected single value')
   }
 }
 
-it("returns filtered data", async () => {
+it('returns filtered data', async () => {
   const result = await executor({
     document: ListFilteredCountriesQuery,
     variables: {
       filter: {
         code: {
-          in: ["US", "CA"],
+          in: ['US', 'CA'],
         },
       },
     },
-  });
+  })
 
-  assertSingleValue(result);
+  assertSingleValue(result)
 
-  expect(result.data?.countries).toHaveLength(2);
-});
+  expect(result.data?.countries).toHaveLength(2)
+})
 
-it("filters names using a regular expression", async () => {
+it('filters names using a regular expression', async () => {
   const result = await executor({
     document: ListFilteredCountriesQuery,
     variables: {
       filter: {
         name: {
-          regex: "^United",
+          regex: '^United',
         },
       },
     },
-  });
+  })
 
-  assertSingleValue(result);
+  assertSingleValue(result)
 
-  expect(result.data?.countries).toHaveLength(3);
-});
+  expect(result.data?.countries).toHaveLength(3)
+})
 
-it("filters a single value", async () => {
+it('filters a single value', async () => {
   const result = await executor({
     document: ListFilteredCountriesQuery,
     variables: {
       filter: {
         code: {
-          eq: "US",
+          eq: 'US',
         },
       },
     },
-  });
+  })
 
-  assertSingleValue(result);
+  assertSingleValue(result)
 
-  expect(result.data?.countries).toHaveLength(1);
-});
+  expect(result.data?.countries).toHaveLength(1)
+})
 
-it("returns all data if no filter is provided", async () => {
+it('returns all data if no filter is provided', async () => {
   const result = await executor({
     document: ListFilteredCountriesQuery,
-  });
+  })
 
-  assertSingleValue(result);
+  assertSingleValue(result)
 
-  expect(result.data?.countries).toHaveLength(Object.keys(countries).length);
-});
+  expect(result.data?.countries).toHaveLength(Object.keys(countries).length)
+})
 
-it("returns data about country subdivisions", async () => {
+it('returns data about country subdivisions', async () => {
   const result = await executor({
     document: parse(/* GraphQL */ `
       query ListBritishSubdivisions {
@@ -98,9 +99,9 @@ it("returns data about country subdivisions", async () => {
         }
       }
     `),
-  });
+  })
 
-  assertSingleValue(result);
+  assertSingleValue(result)
 
-  expect(result.data?.country.subdivisions).toHaveLength(4);
-});
+  expect(result.data?.country.subdivisions).toHaveLength(4)
+})

@@ -1,0 +1,14 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "countries-graphql",
+  "main": "src/graphql.ts",
+  "account_id": "f6203e7ed21fb722943385aaa3daa65a",
+  "compatibility_date": "2026-02-19",
+  "observability": {
+    "enabled": true,
+  },
+}

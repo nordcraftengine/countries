@@ -6,7 +6,7 @@ import { yoga } from './graphql'
 
 const executor = buildHTTPExecutor({
   fetch: yoga.fetch,
-  endpoint: 'http://yoga/',
+  endpoint: 'http://yoga/countries',
 })
 
 const ListFilteredCountriesQuery = parse(/* GraphQL */ `

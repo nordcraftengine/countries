@@ -5,7 +5,8 @@ import { schema } from './schema'
 export const yoga = createYoga({
   schema,
   batching: true,
-  graphqlEndpoint: '/',
+  graphqlEndpoint: '/countries',
+  landingPage: false,
 })
 
 export default {

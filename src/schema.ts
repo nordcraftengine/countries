@@ -1,35 +1,35 @@
-import "./locales";
+import './locales'
 
-import { pathToArray } from "@graphql-tools/utils";
-import SchemaBuilder from "@pothos/core";
-import ZodPlugin from "@pothos/plugin-zod";
-import type { Country, Language } from "countries-list";
-import { continents, countries, languages } from "countries-list";
-import { countryToAwsRegion } from "country-to-aws-region";
-import { GraphQLError } from "graphql";
-import { getName, langs } from "i18n-iso-countries";
-import type { SubdivisionInfo } from "iso-3166-2";
-import { country as getCountry } from "iso-3166-2";
-import provinces from "provinces";
-import sift, { $eq, $in, $ne, $nin, $regex } from "sift";
+import { pathToArray } from '@graphql-tools/utils'
+import SchemaBuilder from '@pothos/core'
+import ZodPlugin from '@pothos/plugin-zod'
+import type { Country, Language } from 'countries-list'
+import { continents, countries, languages } from 'countries-list'
+import { countryToAwsRegion } from 'country-to-aws-region'
+import { GraphQLError } from 'graphql'
+import { getName, langs } from 'i18n-iso-countries'
+import type { SubdivisionInfo } from 'iso-3166-2'
+import { country as getCountry } from 'iso-3166-2'
+import provinces from 'provinces'
+import sift, { $eq, $in, $ne, $nin, $regex } from 'sift'
 
 const builder = new SchemaBuilder<{
-  DefaultFieldNullability: false;
+  DefaultFieldNullability: false
 }>({
   defaultFieldNullability: false,
   plugins: [ZodPlugin],
   zod: {
     validationError: (zodError, _, __, info) => {
-      const [{ message, path }] = zodError.issues;
+      const [{ message, path }] = zodError.issues
       return new GraphQLError(message, {
         path: [...pathToArray(info.path), ...path.map((p) => p.toString())],
         extensions: {
-          code: "VALIDATION_ERROR",
+          code: 'VALIDATION_ERROR',
         },
-      });
+      })
     },
   },
-});
+})
 
 class Continent {
   constructor(
@@ -39,10 +39,10 @@ class Continent {
 }
 
 builder.objectType(Continent, {
-  name: "Continent",
+  name: 'Continent',
   fields: (t) => ({
-    code: t.exposeID("code"),
-    name: t.exposeString("name"),
+    code: t.exposeID('code'),
+    name: t.exposeString('name'),
     countries: t.field({
       type: [CountryRef],
       resolve: (continent) =>
@@ -54,39 +54,39 @@ builder.objectType(Continent, {
           })),
     }),
   }),
-});
+})
 
 const SubdivisionRef = builder.objectRef<
   SubdivisionInfo.Partial & { code: string }
->("Subdivision");
+>('Subdivision')
 
 builder.objectType(SubdivisionRef, {
   fields: (t) => ({
-    code: t.exposeID("code"),
-    name: t.exposeString("name"),
+    code: t.exposeID('code'),
+    name: t.exposeString('name'),
     emoji: t.string({
       nullable: true,
       resolve: (sub) => {
         switch (sub.code) {
-          case "GB-ENG":
-            return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
-          case "GB-SCT":
-            return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
-          case "GB-WLS":
-            return "🏴󠁧󠁢󠁷󠁬󠁳󠁿";
+          case 'GB-ENG':
+            return '🏴󠁧󠁢󠁥󠁮󠁧󠁿'
+          case 'GB-SCT':
+            return '🏴󠁧󠁢󠁳󠁣󠁴󠁿'
+          case 'GB-WLS':
+            return '🏴󠁧󠁢󠁷󠁬󠁳󠁿'
           default:
-            return null;
+            return null
         }
       },
     }),
   }),
-});
+})
 
-const CountryRef = builder.objectRef<Country & { code: string }>("Country");
+const CountryRef = builder.objectRef<Country & { code: string }>('Country')
 
 builder.objectType(CountryRef, {
   fields: (t) => ({
-    code: t.exposeID("code"),
+    code: t.exposeID('code'),
     name: t.string({
       args: {
         lang: t.arg.string({
@@ -95,16 +95,16 @@ builder.objectType(CountryRef, {
       },
       resolve: async (country, { lang }) => {
         if (lang) {
-          return getName(country.code, lang) ?? country.name;
+          return getName(country.code, lang) ?? country.name
         }
 
-        return country.name;
+        return country.name
       },
     }),
-    native: t.exposeString("native"),
-    phone: t.exposeString("phone"),
+    native: t.exposeString('native'),
+    phone: t.exposeString('phone'),
     phones: t.stringList({
-      resolve: (country) => country.phone.split(","),
+      resolve: (country) => country.phone.split(','),
     }),
     capital: t.string({
       nullable: true,
@@ -115,10 +115,10 @@ builder.objectType(CountryRef, {
       resolve: (country) => country.currency || null, // account for empty string
     }),
     currencies: t.stringList({
-      resolve: (country) => country.currency.split(","),
+      resolve: (country) => country.currency.split(','),
     }),
-    emoji: t.exposeString("emoji"),
-    emojiU: t.exposeString("emojiU"),
+    emoji: t.exposeString('emoji'),
+    emojiU: t.exposeString('emojiU'),
     continent: t.field({
       type: Continent,
       resolve: (country) =>
@@ -147,9 +147,9 @@ builder.objectType(CountryRef, {
     subdivisions: t.field({
       type: [SubdivisionRef],
       resolve: ({ code }) => {
-        const country = getCountry(code);
+        const country = getCountry(code)
         if (!country) {
-          return [];
+          return []
         }
 
         return Object.entries(country.sub)
@@ -160,20 +160,20 @@ builder.objectType(CountryRef, {
           .filter(
             (sub) =>
               // account for subdivisions of Great Britain
-              sub.type === "Country" || sub.type === "Province",
-          );
+              sub.type === 'Country' || sub.type === 'Province',
+          )
       },
     }),
   }),
-});
+})
 
-const LanguageRef = builder.objectRef<Language & { code: string }>("Language");
+const LanguageRef = builder.objectRef<Language & { code: string }>('Language')
 
 builder.objectType(LanguageRef, {
   fields: (t) => ({
-    code: t.exposeID("code"),
-    name: t.exposeString("name"),
-    native: t.exposeString("native"),
+    code: t.exposeID('code'),
+    name: t.exposeString('name'),
+    native: t.exposeString('native'),
     rtl: t.boolean({
       resolve: (language) => language.rtl === 1,
     }),
@@ -189,14 +189,14 @@ builder.objectType(LanguageRef, {
           .map(([code, country]) => ({ ...country, code })),
     }),
   }),
-});
+})
 
-const StateRef = builder.objectRef<Province>("State");
+const StateRef = builder.objectRef<Province>('State')
 
 builder.objectType(StateRef, {
   fields: (t) => ({
-    name: t.exposeString("name"),
-    code: t.exposeString("short", { nullable: true }),
+    name: t.exposeString('name'),
+    code: t.exposeString('short', { nullable: true }),
     country: t.field({
       type: CountryRef,
       resolve: (province) => ({
@@ -205,9 +205,9 @@ builder.objectType(StateRef, {
       }),
     }),
   }),
-});
+})
 
-const StringQueryOperatorInput = builder.inputType("StringQueryOperatorInput", {
+const StringQueryOperatorInput = builder.inputType('StringQueryOperatorInput', {
   fields: (t) => ({
     eq: t.string(),
     ne: t.string(),
@@ -215,28 +215,28 @@ const StringQueryOperatorInput = builder.inputType("StringQueryOperatorInput", {
     nin: t.stringList(),
     regex: t.string(),
   }),
-});
+})
 
-const CountryFilterInput = builder.inputType("CountryFilterInput", {
+const ContinentFilterInput = builder.inputType('ContinentFilterInput', {
+  fields: (t) => ({
+    code: t.field({ type: StringQueryOperatorInput }),
+  }),
+})
+
+const LanguageFilterInput = builder.inputType('LanguageFilterInput', {
+  fields: (t) => ({
+    code: t.field({ type: StringQueryOperatorInput }),
+  }),
+})
+
+const CountryFilterInput = builder.inputType('CountryFilterInput', {
   fields: (t) => ({
     code: t.field({ type: StringQueryOperatorInput }),
     name: t.field({ type: StringQueryOperatorInput }),
     currency: t.field({ type: StringQueryOperatorInput }),
-    continent: t.field({ type: StringQueryOperatorInput }),
+    continent: t.field({ type: ContinentFilterInput }),
   }),
-});
-
-const ContinentFilterInput = builder.inputType("ContinentFilterInput", {
-  fields: (t) => ({
-    code: t.field({ type: StringQueryOperatorInput }),
-  }),
-});
-
-const LanguageFilterInput = builder.inputType("LanguageFilterInput", {
-  fields: (t) => ({
-    code: t.field({ type: StringQueryOperatorInput }),
-  }),
-});
+})
 
 const operations = {
   eq: $eq,
@@ -244,19 +244,19 @@ const operations = {
   in: $in,
   nin: $nin,
   regex: $regex,
-};
+}
 
 const isValidContinentCode = (
   code: string | number,
-): code is keyof typeof continents => code in continents;
+): code is keyof typeof continents => code in continents
 
 const isValidCountryCode = (
   code: string | number,
-): code is keyof typeof countries => code in countries;
+): code is keyof typeof countries => code in countries
 
 const isValidLanguageCode = (
   code: string | number,
-): code is keyof typeof languages => code in languages;
+): code is keyof typeof languages => code in languages
 
 builder.queryType({
   fields: (t) => ({
@@ -295,12 +295,18 @@ builder.queryType({
         }),
       },
       resolve: (_, { filter }) => {
+        const query = JSON.parse(JSON.stringify(filter))
+
+        if (query.continent?.code) {
+          query.continent = query.continent.code
+        }
+
         return Object.entries(countries)
           .map(([code, country]) => ({
             ...country,
             code,
           }))
-          .filter(sift(JSON.parse(JSON.stringify(filter)), { operations }));
+          .filter(sift(query, { operations }))
       },
     }),
     country: t.field({
@@ -348,6 +354,6 @@ builder.queryType({
           : null,
     }),
   }),
-});
+})
 
-export const schema = builder.toSchema();
+export const schema = builder.toSchema()

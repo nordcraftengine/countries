@@ -104,3 +104,25 @@ it('returns data about country subdivisions', async () => {
 
   expect(result.data?.country.subdivisions).toHaveLength(4)
 })
+
+it('filters countries by continent code', async () => {
+  const result = await executor({
+    document: ListFilteredCountriesQuery,
+    variables: {
+      filter: {
+        continent: {
+          code: {
+            eq: 'AF',
+          },
+        },
+      },
+    },
+  })
+
+  assertSingleValue(result)
+
+  const afCountries = Object.values(countries).filter(
+    (c) => c.continent === 'AF',
+  )
+  expect(result.data?.countries).toHaveLength(afCountries.length)
+})
